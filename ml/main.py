@@ -19,6 +19,7 @@ brain = EcoBrain()
 # --- DATABASES ---
 alerts_log = []  # Stores Alert History
 pump_history_log = []  # Stores Pumping History
+battery_history_log = []  # Stores Battery Charging History
 room_status_db = {}  # Real-time Room Status
 
 # --- DATA MODELS ---
@@ -126,6 +127,49 @@ def calculate_pump_schedule():
     pump_history_log.append(decision)
     return decision
 
+
+@app.get("/api/battery/optimize")
+def calculate_battery_schedule():
+    """ ENERGY ARBITRAGE: Charges battery during cheap hours. """
+    current_time = datetime.now()
+
+    # 1. Simulate Battery State
+    battery_capacity = 100.0  # kWh (Powerwall-sized commercial unit)
+    current_charge = 30.0  # kWh (Average based on usage patterns, 30% charged)
+
+    # 2. Calculate Needs
+    energy_needed_kwh = battery_capacity - current_charge  # 70 kWh needed
+
+    # 3. Cost Math (DERC Tariffs)
+    off_peak_rate = 6.80  # Night rate
+    peak_rate = 10.20  # Day rate
+
+    actual_cost = energy_needed_kwh * off_peak_rate
+    potential_peak_cost = energy_needed_kwh * peak_rate
+    savings = potential_peak_cost - actual_cost
+
+    # 4. Schedule (Charge Speed)
+    # Assume 10kW Charger -> 70kWh / 10kW = 7 Hours
+    duration_hours = energy_needed_kwh / 10.0
+
+    decision = {
+        "date": current_time.strftime("%Y-%m-%d"),
+        "timestamp": current_time,
+        "initial_charge": "30%",
+        "target_charge": "100%",
+        "energy_added": f"{energy_needed_kwh} kWh",
+        "scheduled_time": "01:00 AM",
+        "duration": f"{round(duration_hours, 1)} Hours",
+        "total_cost": f"₹{round(actual_cost, 2)}",
+        "money_saved": f"₹{round(savings, 2)}",
+        "grid_status": "Off-Peak (Optimized)"
+    }
+
+    # Save to History
+    battery_history_log.append(decision)
+
+    return decision
+
 # --- HISTORY ENDPOINTS ---
 @app.get("/api/history/alerts")
 def get_alert_history():
@@ -136,6 +180,10 @@ def get_alert_history():
 def get_pump_history():
     """Returns the history of all pump operations."""
     return sorted(pump_history_log, key=lambda x: x['timestamp'], reverse=True)
+
+@app.get("/api/history/battery")
+def get_battery_history():
+    return sorted(battery_history_log, key=lambda x: x['timestamp'], reverse=True)
 
 # --- MANUAL OVERRIDE ---
 
