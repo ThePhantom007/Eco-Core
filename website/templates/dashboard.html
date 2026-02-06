@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EcoCore Dashboard</title>
+    <link rel="stylesheet" href="/website/static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1><i class="fas fa-leaf"></i> EcoCore OS</h1>
+            <p>Sustainability Operating System</p>
+        </div>
+        <div class="status-badge">
+            <i class="fas fa-wifi"></i> System Online
+        </div>
+    </header>
+
+    <div class="metrics-grid">
+
+        <div class="card">
+            <h2><i class="fas fa-water"></i> Water Pumping History</h2>
+            <div style="overflow-x: auto;">
+                <table id="water-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Volume</th>
+                            <th>Cost (Off-Peak)</th>
+                            <th>Savings</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-battery-half"></i> Battery Charging History</h2>
+            <div style="overflow-x: auto;">
+                <table id="battery-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Energy Added</th>
+                            <th>Cost (Off-Peak)</th>
+                            <th>Savings</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2><i class="fas fa-history"></i> Impact History (Wastage Prevented)</h2>
+        <table id="alerts-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Event Type</th>
+                    <th>Probable Wastage (1 Hr)</th>
+                    <th>Estimated Savings</th>
+                    <th>Confidence</th>
+                    <th>Action Taken</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    // Point to your FastAPI URL (Empty string works if hosted on same server)
+    const API_BASE = "";
+
+    async function loadDashboard() {
+        try {
+            // 1. Fetch Alerts & Impact
+            const alertRes = await fetch(`${API_BASE}/api/history/alerts`);
+            const alerts = await alertRes.json();
+            renderTable('alerts-table', alerts, (item) => `
+                <tr class="alert-row ${item.type}">
+                    <td>${new Date(item.time).toLocaleTimeString()}</td>
+                    <td>
+                        <span style="font-weight:600">${item.type.replace('_', ' ')}</span><br>
+                        <span style="font-size:0.8em; color:#666;">${item.message}</span>
+                    </td>
+                    <td style="color:#d32f2f;">${item.probable_wastage || '-'}</td>
+                    <td style="color:#2e7d32; font-weight:bold;">${item.estimated_savings || '-'}</td>
+                    <td>
+                        <div style="background:#eee; border-radius:4px; width:100%; height:6px;">
+                            <div style="background:#2e7d32; width:${item.probability_score.replace('%','') || 0}%; height:100%; border-radius:4px;"></div>
+                        </div>
+                        <span style="font-size:0.8em">${item.probability_score}</span>
+                    </td>
+                    <td><span class="status-badge" style="font-size:0.8em;">${item.action}</span></td>
+                </tr>
+            `);
+
+            // 2. Fetch Water History
+            const pumpRes = await fetch(`${API_BASE}/api/history/pumping`);
+            const pumps = await pumpRes.json();
+            renderTable('water-table', pumps, (item) => `
+                <tr>
+                    <td>${item.date}</td>
+                    <td>${item.total_water_pumped}</td>
+                    <td>${item.total_cost}</td>
+                    <td style="color: green; font-weight:bold;">${item.money_saved}</td>
+                </tr>
+            `);
+
+            // 3. Fetch Battery History
+            const battRes = await fetch(`${API_BASE}/api/history/battery`);
+            const batts = await battRes.json();
+            renderTable('battery-table', batts, (item) => `
+                <tr>
+                    <td>${new Date(item.timestamp).toLocaleTimeString()}</td>
+                    <td>${item.energy_added}</td>
+                    <td>${item.total_cost}</td>
+                    <td style="color: green; font-weight:bold;">${item.money_saved}</td>
+                </tr>
+            `);
+
+        } catch (error) {
+            console.error("Error loading dashboard:", error);
+        }
+    }
+
+    function renderTable(tableId, data, rowBuilder) {
+        const tbody = document.querySelector(`#${tableId} tbody`);
+        tbody.innerHTML = data.map(rowBuilder).join('');
+    }
+
+    loadDashboard();
+    setInterval(loadDashboard, 3000); // Live update every 3 seconds
+</script>
+
+</body>
+</html>
