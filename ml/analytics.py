@@ -38,7 +38,7 @@ class EcoBrain:
     def train_new_model(self):
         # 1. Check if Data Exists. If not, create it.
         if not os.path.exists(self.data_path):
-            print("⚠️ Data file missing. Generating synthetic data...")
+            print("Data file missing. Generating synthetic data...")
             self.generate_data()
 
         # 2. Load Data
@@ -54,7 +54,7 @@ class EcoBrain:
         # 4. Save Model
         joblib.dump(model, self.model_path)
         self.model = model
-        print(f"✅ New model saved to: {self.model_path}")
+        print(f"New model saved to: {self.model_path}")
 
     def generate_data(self):
         # Internal generator in case data_generator.py wasn't run
