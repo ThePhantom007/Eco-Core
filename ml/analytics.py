@@ -53,7 +53,7 @@ class EcoBrain:
 
         for model_name, (model, param_grid) in models.items():
             grid_search = GridSearchCV(estimator=model, param_grid=param_grid,
-                                       scoring='neg_mean_squared_error', cv=5, n_jobs=-1, verbose=3)
+                                       scoring='neg_mean_squared_error', cv=5, n_jobs=-1, verbose=1)
             grid_search.fit(X_train, y_train)
             best_estimator = grid_search.best_estimator_
             params = grid_search.best_params_
