@@ -106,26 +106,50 @@
             // 2. Fetch Water History
             const pumpRes = await fetch(`${API_BASE}/api/history/pumping`);
             const pumps = await pumpRes.json();
+
+            // Sort by date (Oldest to Newest) for the graph
+            const sortedPumps = pumps.slice().sort((a,b) => new Date(a.date) - new Date(b.date));
+
             renderTable('water-table', pumps, (item) => `
                 <tr>
                     <td>${item.date}</td>
                     <td>${item.total_water_pumped}</td>
-                    <td>${item.total_cost}</td>
+                    <td>₹${item.total_cost}</td>
                     <td style="color: green; font-weight:bold;">${item.money_saved}</td>
                 </tr>
             `);
 
+            // Draw Water Chart
+            drawChart(
+                'waterChart',
+                sortedPumps.map(i => i.date),
+                sortedPumps.map(i => i.peak_cost_comparison),
+                sortedPumps.map(i => i.total_cost),
+                'Potential Cost (Peak)', 'Optimized Cost (Off-Peak)'
+            );
+
             // 3. Fetch Battery History
             const battRes = await fetch(`${API_BASE}/api/history/battery`);
             const batts = await battRes.json();
+            const sortedBatts = batts.slice().sort((a,b) => new Date(a.date) - new Date(b.date));
+
             renderTable('battery-table', batts, (item) => `
                 <tr>
-                    <td>${new Date(item.timestamp).toLocaleTimeString()}</td>
+                    <td>${item.date}</td>
                     <td>${item.energy_added}</td>
-                    <td>${item.total_cost}</td>
+                    <td>₹${item.total_cost}</td>
                     <td style="color: green; font-weight:bold;">${item.money_saved}</td>
                 </tr>
             `);
+
+            // Draw Battery Chart
+            drawChart(
+                'batteryChart',
+                sortedBatts.map(i => i.date),
+                sortedBatts.map(i => i.peak_cost_comparison),
+                sortedBatts.map(i => i.total_cost),
+                'Standard Cost', 'EcoCore Cost'
+            );
 
         } catch (error) {
             console.error("Error loading dashboard:", error);
@@ -133,8 +157,55 @@
     }
 
     function renderTable(tableId, data, rowBuilder) {
-        const tbody = document.querySelector(`#${tableId} tbody`);
-        tbody.innerHTML = data.map(rowBuilder).join('');
+        document.querySelector(`#${tableId} tbody`).innerHTML = data.map(rowBuilder).join('');
+    }
+
+    // --- CHART.JS BUILDER ---
+    function drawChart(canvasId, labels, dataHigh, dataLow, labelHigh, labelLow) {
+        function drawChart(canvasId, labels, dataHigh, dataLow, labelHigh, labelLow) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+
+        // CHECK: Does the chart already exist?
+        if (window[canvasId] instanceof Chart) {
+            // YES: Just update the data points (Smooth Animation)
+            window[canvasId].data.labels = labels;
+            window[canvasId].data.datasets[0].data = dataHigh;
+            window[canvasId].data.datasets[1].data = dataLow;
+            window[canvasId].update('none'); // 'none' mode prevents full re-animation
+        } else {
+            // NO: Create it from scratch (First Load)
+            window[canvasId] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: labelHigh, // Red Line
+                            data: dataHigh,
+                            borderColor: '#ff5252',
+                            backgroundColor: 'rgba(255, 82, 82, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: labelLow, // Green Line
+                            data: dataLow,
+                            borderColor: '#4caf50',
+                            backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    animation: false, // Disable bounce animation on updates
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { position: 'top' } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
     }
 
     loadDashboard();

@@ -3,9 +3,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 from ml.analytics import EcoBrain
 from fastapi.middleware.cors import CORSMiddleware
+import random
 
 app = FastAPI(title="EcoCore OS", version="1.0")
 brain = EcoBrain()
@@ -26,6 +27,72 @@ alerts_log = []  # Stores Alert History
 pump_history_log = []  # Stores Pumping History
 battery_history_log = []  # Stores Battery Charging History
 room_status_db = {}  # Real-time Room Status
+
+def seed_demo_data():
+    """ Generates 7 days of history so the Dashboard Graphs look impressive immediately. """
+    now = datetime.now()
+    for i in range(7):
+        # Go back 'i' days (0 = Today, 1 = Yesterday, etc.)
+        past_date = now - timedelta(days=i)
+        date_str = past_date.strftime("%Y-%m-%d")
+
+        # --- 1. Water Pump Data ---
+        # Vary water usage slightly (between 11,000 and 13,000 L)
+        daily_water = random.uniform(11000, 13000)
+
+        # Cost Math
+        energy_kwh = (daily_water / 1000) * 0.5
+        actual_cost = energy_kwh * 6.80  # Off-Peak
+        peak_cost = energy_kwh * 10.20  # Peak
+        savings = peak_cost - actual_cost
+
+        pump_history_log.append({
+            "date": date_str,
+            "timestamp": past_date.replace(hour=2, minute=0),
+            "total_water_pumped": f"{int(daily_water)} L",
+            "scheduled_time": "02:00 AM",
+            "duration": f"{round(daily_water / 5000, 1)} Hours",
+            "total_cost": round(actual_cost, 2),  # Store as NUMBER for graphing
+            "peak_cost_comparison": round(peak_cost, 2),  # Store for graphing
+            "money_saved": f"₹{round(savings, 2)}",
+            "grid_status": "Off-Peak"
+        })
+
+        # --- 2. Battery Data ---
+        # Vary battery needs slightly
+        daily_charge = random.uniform(65, 80)  # kWh
+
+        batt_actual = daily_charge * 6.80
+        batt_peak = daily_charge * 10.20
+        batt_savings = batt_peak - batt_actual
+
+        battery_history_log.append({
+            "date": date_str,
+            "timestamp": past_date.replace(hour=1, minute=0),
+            "energy_added": f"{int(daily_charge)} kWh",
+            "initial_charge": "20%",
+            "target_charge": "100%",
+            "total_cost": round(batt_actual, 2),  # Store as NUMBER
+            "peak_cost_comparison": round(batt_peak, 2),  # Store for graphing
+            "money_saved": f"₹{round(batt_savings, 2)}",
+            "grid_status": "Off-Peak"
+        })
+
+        # Alerts
+    alerts_log.append({
+        "id": 101, "time": now - timedelta(hours=3),
+        "type": "CRITICAL_LEAK", "message": "Leak in Restroom 3B",
+        "probable_wastage": "450 Liters", "estimated_savings": "₹22.95",
+        "probability_score": "98.5%", "action": "AUTO_CUTOFF", "status": "RESOLVED"
+    })
+    alerts_log.append({
+        "id": 102, "time": now - timedelta(minutes=15),
+        "type": "ENERGY_WASTE", "message": "Lecture Hall 101 AC on",
+        "probable_wastage": "2.5 kWh", "estimated_savings": "₹25.50",
+        "probability_score": "94.2%", "action": "AUTO_CUTOFF", "status": "RESOLVED"
+    })
+
+seed_demo_data()
 
 # --- DATA MODELS ---
 class SensorReading(BaseModel):
