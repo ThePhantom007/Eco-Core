@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/static/style.css">
 
     <style>
-        /* --- NEW MODAL STYLES (Popup Logic) --- */
+        /* --- MODAL STYLES (Popup Logic) --- */
         .modal {
             display: none; /* Hidden by default */
             position: fixed;
@@ -53,10 +53,24 @@
         .summary-card {
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
         }
         .summary-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Simulation Panel Style */
+        .sim-panel {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 1px solid #90caf9;
+        }
+
+        /* Forecast Card Style */
+        .forecast-card {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border: 1px solid #a5d6a7;
         }
     </style>
 </head>
@@ -73,7 +87,39 @@
         </div>
     </header>
 
+    <div class="card sim-panel">
+        <h2><i class="fas fa-gamepad"></i> Digital Twin Controller (Simulation)</h2>
+        <div style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;">
+
+            <div style="flex: 1; min-width: 200px;">
+                <label for="occupancy">Occupancy: <span id="occ-val" style="font-weight:bold">0</span> people</label>
+                <input type="range" id="occupancy" min="0" max="100" value="0" style="width:100%"
+                       oninput="document.getElementById('occ-val').innerText = this.value">
+            </div>
+
+            <div style="flex: 1; min-width: 200px;">
+                <label for="energy">Energy Load: <span id="energy-val" style="font-weight:bold">0.5</span> kW</label>
+                <input type="range" id="energy" min="0" max="5.0" step="0.1" value="0.5" style="width:100%"
+                       oninput="document.getElementById('energy-val').innerText = this.value">
+            </div>
+
+            <div style="flex: 1; min-width: 200px;">
+                <label for="water">Water Flow: <span id="water-val" style="font-weight:bold">0.0</span> L/min</label>
+                <input type="range" id="water" min="0" max="10.0" step="0.1" value="0.0" style="width:100%"
+                       oninput="document.getElementById('water-val').innerText = this.value">
+            </div>
+
+            <button onclick="sendSimData()" style="
+                background: var(--primary-green); color: white; border: none;
+                padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <i class="fas fa-satellite-dish"></i> Send to AI
+            </button>
+        </div>
+        <p id="sim-status" style="margin-top: 15px; font-weight: 500; height: 20px;"></p>
+    </div>
+
     <div class="metrics-grid">
+
         <div class="card summary-card" onclick="openModal('waterModal')">
             <h2><i class="fas fa-water"></i> Water System</h2>
             <h1 id="water-total-savings">₹0.00</h1>
@@ -86,6 +132,13 @@
             <h1 id="battery-total-savings">₹0.00</h1>
             <p>Saved this week</p>
             <small style="color: var(--accent-teal)">Click for Graph & History &rarr;</small>
+        </div>
+
+        <div class="card summary-card forecast-card" style="cursor: default;">
+            <h2><i class="fas fa-crystal-ball"></i> AI Forecast (30 Days)</h2>
+            <h1 id="forecast-bill">Loading...</h1>
+            <p id="forecast-water">Projecting usage...</p>
+            <small id="forecast-status" style="font-weight: bold; color: #2e7d32;"></small>
         </div>
 
         <div class="card summary-card" onclick="openModal('alertsModal')">
@@ -139,9 +192,9 @@
 </div>
 
 <script>
-    const API_BASE = ""; // Relative path works automatically
+    const API_BASE = "";
 
-    // Global Storage for Data
+    // Global Storage
     let waterData = [];
     let batteryData = [];
     let alertData = [];
@@ -149,77 +202,84 @@
     // --- 1. DATA FETCHING ---
     async function refreshData() {
         try {
-            console.log("Fetching data...");
+            // Fetch All Data in Parallel
+            const [pumpRes, battRes, alertRes, forecastRes] = await Promise.all([
+                fetch(`${API_BASE}/api/history/pumping`),
+                fetch(`${API_BASE}/api/history/battery`),
+                fetch(`${API_BASE}/api/history/alerts`),
+                fetch(`${API_BASE}/api/forecast/budget`) // Fetch Forecast
+            ]);
 
-            // Fetch Water
-            const pumpRes = await fetch(`${API_BASE}/api/history/pumping`);
             waterData = await pumpRes.json();
-
-            // Fetch Battery
-            const battRes = await fetch(`${API_BASE}/api/history/battery`);
             batteryData = await battRes.json();
-
-            // Fetch Alerts
-            const alertRes = await fetch(`${API_BASE}/api/history/alerts`);
             alertData = await alertRes.json();
+            const forecastData = await forecastRes.json();
 
             // UPDATE UI
-            updateSummaryCards();
+            updateSummaryCards(forecastData);
             renderTables();
 
-            // Note: Graphs are drawn only when the modal opens to fix sizing bugs
+            // Note: Graphs are drawn only when modal opens
 
         } catch (error) {
             console.error("Error fetching data:", error);
         }
     }
 
-    // --- 2. UPDATE SUMMARY CARDS ---
-    function updateSummaryCards() {
-        // Calculate Total Water Savings (Parsing string "₹21.25" -> Float)
+    // --- 2. UPDATE CARDS (With Forecast) ---
+    function updateSummaryCards(forecast) {
+        // Water Savings
         let waterSavings = waterData.reduce((acc, item) => {
             let val = parseFloat(item.money_saved.replace(/[₹,]/g, '')) || 0;
             return acc + val;
         }, 0);
         document.getElementById('water-total-savings').innerText = "₹" + waterSavings.toFixed(2);
 
-        // Calculate Total Battery Savings
+        // Battery Savings
         let battSavings = batteryData.reduce((acc, item) => {
             let val = parseFloat(item.money_saved.replace(/[₹,]/g, '')) || 0;
             return acc + val;
         }, 0);
         document.getElementById('battery-total-savings').innerText = "₹" + battSavings.toFixed(2);
 
-        // Alert Count
+        // Alerts
         document.getElementById('alert-count').innerText = alertData.length;
+
+        // Forecast Card
+        if (forecast) {
+            document.getElementById('forecast-bill').innerText = forecast.projected_bill;
+            document.getElementById('forecast-water').innerText = `Est. Usage: ${forecast.projected_water_usage}`;
+
+            const statusElem = document.getElementById('forecast-status');
+            statusElem.innerText = forecast.status;
+            statusElem.style.color = forecast.status.includes("Under") ? "#2e7d32" : "#d32f2f";
+        }
     }
 
     // --- 3. RENDER TABLES ---
     function renderTables() {
-        // Water Table
-        const waterRows = waterData.map(item => `
+        // Water
+        document.querySelector('#water-table tbody').innerHTML = waterData.map(item => `
             <tr>
                 <td>${item.date}</td>
                 <td>${item.total_water_pumped}</td>
-                <td>₹${item.total_cost}</td>
+                <td>${item.total_cost}</td>
                 <td style="color:green; font-weight:bold">${item.money_saved}</td>
             </tr>
         `).join('');
-        document.querySelector('#water-table tbody').innerHTML = waterRows;
 
-        // Battery Table
-        const battRows = batteryData.map(item => `
+        // Battery
+        document.querySelector('#battery-table tbody').innerHTML = batteryData.map(item => `
             <tr>
                 <td>${item.date}</td>
                 <td>${item.energy_added}</td>
-                <td>₹${item.total_cost}</td>
+                <td>${item.total_cost}</td>
                 <td style="color:green; font-weight:bold">${item.money_saved}</td>
             </tr>
         `).join('');
-        document.querySelector('#battery-table tbody').innerHTML = battRows;
 
-        // Alerts Table
-        const alertRows = alertData.map(item => `
+        // Alerts
+        document.querySelector('#alerts-table tbody').innerHTML = alertData.map(item => `
             <tr class="alert-row ${item.type}">
                 <td>${new Date(item.time).toLocaleTimeString()}</td>
                 <td><b>${item.type}</b><br><small>${item.message}</small></td>
@@ -229,75 +289,101 @@
                 <td><span class="status-badge">${item.action}</span></td>
             </tr>
         `).join('');
-        document.querySelector('#alerts-table tbody').innerHTML = alertRows;
     }
 
-    // --- 4. MODAL LOGIC & GRAPH DRAWING ---
+    // --- 4. SIMULATION LOGIC ---
+    async function sendSimData() {
+        const occ = parseInt(document.getElementById('occupancy').value);
+        const energy = parseFloat(document.getElementById('energy').value);
+        const water = parseFloat(document.getElementById('water').value);
+        const btn = document.querySelector('button');
+
+        // Visual Feedback
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        document.getElementById('sim-status').innerText = "Sending sensor packet to AI Model...";
+
+        const payload = {
+            "room_id": "Demo Room A",
+            "occupancy": occ,
+            "light_lux": occ > 0 ? 500 : 0,
+            "water_flow": water,
+            "energy_load": energy
+        };
+
+        try {
+            const res = await fetch(`${API_BASE}/sensor/ingest`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+
+            if (result.alert) {
+                document.getElementById('sim-status').innerHTML =
+                    `<span style="color:#d32f2f; font-weight:bold"><i class="fas fa-exclamation-triangle"></i> ALERT: ${result.alert.type} (Confidence: ${result.alert.probability_score})</span>`;
+                // Instant Refresh
+                refreshData();
+            } else {
+                document.getElementById('sim-status').innerHTML =
+                    `<span style="color:#2e7d32; font-weight:bold"><i class="fas fa-check-circle"></i> Normal Operation. AI Prediction: ${result.debug.ai_water_normal.toFixed(1)}L</span>`;
+            }
+        } catch (err) {
+            console.error(err);
+            document.getElementById('sim-status').innerText = "❌ Connection Error";
+        } finally {
+            btn.innerHTML = '<i class="fas fa-satellite-dish"></i> Send to AI';
+        }
+    }
+
+    // --- 5. MODALS & GRAPHS ---
     function openModal(modalId) {
         document.getElementById(modalId).style.display = "block";
-
-        // Draw charts ONLY when modal opens (fixes squished chart bug)
-        if (modalId === 'waterModal') drawWaterChart();
-        if (modalId === 'batteryModal') drawBatteryChart();
+        if (modalId === 'waterModal') drawChart('waterChart', waterData, 'peak_cost_comparison', 'total_cost');
+        if (modalId === 'batteryModal') drawChart('batteryChart', batteryData, 'peak_cost_comparison', 'total_cost');
     }
 
     function closeModal(modalId) {
         document.getElementById(modalId).style.display = "none";
     }
 
-    // Close modal if clicking outside box
     window.onclick = function(event) {
-        if (event.target.classList.contains('modal')) {
-            event.target.style.display = "none";
+        if (event.target.classList.contains('modal')) event.target.style.display = "none";
+    }
+
+    // --- 6. FLICKER-FREE CHART BUILDER ---
+    function drawChart(canvasId, rawData, keyHigh, keyLow) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+
+        // Sort Data by Date
+        const sorted = rawData.slice().sort((a,b) => new Date(a.date) - new Date(b.date));
+        const labels = sorted.map(i => i.date);
+        const dataHigh = sorted.map(i => i[keyHigh]); // Peak Cost
+        const dataLow = sorted.map(i => i[keyLow]);   // Our Cost
+
+        // Check if chart exists
+        if (window[canvasId] instanceof Chart) {
+            window[canvasId].data.labels = labels;
+            window[canvasId].data.datasets[0].data = dataHigh;
+            window[canvasId].data.datasets[1].data = dataLow;
+            window[canvasId].update('none');
+        } else {
+            window[canvasId] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Standard Cost (Peak)', data: dataHigh, borderColor: '#ff5252', backgroundColor: 'rgba(255, 82, 82, 0.1)', fill: true, tension: 0.4 },
+                        { label: 'EcoCore Cost (Optimized)', data: dataLow, borderColor: '#4caf50', backgroundColor: 'rgba(76, 175, 80, 0.2)', fill: true, tension: 0.4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, animation: false, scales: { y: { beginAtZero: true } } }
+            });
         }
     }
 
-    // --- 5. CHART BUILDERS ---
-    let waterChartInstance = null;
-    let batteryChartInstance = null;
-
-    function drawWaterChart() {
-        const ctx = document.getElementById('waterChart').getContext('2d');
-        if (waterChartInstance) waterChartInstance.destroy(); // Prevent duplicates
-
-        // Sort by date
-        const sorted = waterData.slice().sort((a,b) => new Date(a.date) - new Date(b.date));
-
-        waterChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: sorted.map(i => i.date),
-                datasets: [
-                    { label: 'Peak Cost (Avoided)', data: sorted.map(i => i.peak_cost_comparison), borderColor: '#ff5252', fill: false },
-                    { label: 'Optimized Cost (Paid)', data: sorted.map(i => i.total_cost), borderColor: '#4caf50', backgroundColor: 'rgba(76, 175, 80, 0.2)', fill: true }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-    }
-
-    function drawBatteryChart() {
-        const ctx = document.getElementById('batteryChart').getContext('2d');
-        if (batteryChartInstance) batteryChartInstance.destroy();
-
-        const sorted = batteryData.slice().sort((a,b) => new Date(a.date) - new Date(b.date));
-
-        batteryChartInstance = new Chart(ctx, {
-            type: 'bar', // Using Bar chart for variety
-            data: {
-                labels: sorted.map(i => i.date),
-                datasets: [
-                    { label: 'Savings Generated', data: sorted.map(i => parseFloat(i.money_saved.replace(/[₹,]/g, ''))), backgroundColor: '#4caf50' }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-    }
-
-    // INITIAL LOAD
+    // INIT
     refreshData();
-    // Auto-refresh every 5 seconds
-    setInterval(refreshData, 5000);
+    setInterval(refreshData, 3000); // 3-Second Auto Refresh
 
 </script>
 </body>
