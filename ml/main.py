@@ -29,21 +29,34 @@ battery_history_log = []  # Stores Battery Charging History
 room_status_db = {}  # Real-time Room Status
 
 def seed_demo_data():
-    """ Generates 7 days of history so the Dashboard Graphs look impressive immediately. """
+    """
+    Generates 31 days of history.
+    Includes 'Weekend' logic so the data looks real (dips on Sat/Sun).
+    """
     now = datetime.now()
-    for i in range(7):
-        # Go back 'i' days (0 = Today, 1 = Yesterday, etc.)
-        past_date = now - timedelta(days=i)
+    alerts_log.clear()
+    pump_history_log.clear()
+    battery_history_log.clear()
+
+    print("🌱 Seeding 31 Days of History...")
+
+    for i in range(31):
+        # Go back 'i' days
+        past_date = now - timedelta(days=30-i) # Start 30 days ago, end today
         date_str = past_date.strftime("%Y-%m-%d")
 
-        # --- 1. Water Pump Data ---
-        # Vary water usage slightly (between 11,000 and 13,000 L)
-        daily_water = random.uniform(11000, 13000)
+        # WEEKEND LOGIC: If Sat(5) or Sun(6), usage is low
+        is_weekend = past_date.weekday() >= 5
 
-        # Cost Math
+        # --- 1. Water Pump Data ---
+        if is_weekend:
+            daily_water = random.uniform(2000, 4000) # Low usage
+        else:
+            daily_water = random.uniform(11000, 14000) # High usage
+
         energy_kwh = (daily_water / 1000) * 0.5
         actual_cost = energy_kwh * 6.80  # Off-Peak
-        peak_cost = energy_kwh * 10.20  # Peak
+        peak_cost = energy_kwh * 10.20   # Peak
         savings = peak_cost - actual_cost
 
         pump_history_log.append({
@@ -51,16 +64,18 @@ def seed_demo_data():
             "timestamp": past_date.replace(hour=2, minute=0),
             "total_water_pumped": f"{int(daily_water)} L",
             "scheduled_time": "02:00 AM",
-            "duration": f"{round(daily_water / 5000, 1)} Hours",
-            "total_cost": round(actual_cost, 2),  # Store as NUMBER for graphing
-            "peak_cost_comparison": round(peak_cost, 2),  # Store for graphing
+            "duration": f"{round(daily_water/5000, 1)} Hours",
+            "total_cost": round(actual_cost, 2),
+            "peak_cost_comparison": round(peak_cost, 2),
             "money_saved": f"₹{round(savings, 2)}",
             "grid_status": "Off-Peak"
         })
 
         # --- 2. Battery Data ---
-        # Vary battery needs slightly
-        daily_charge = random.uniform(65, 80)  # kWh
+        if is_weekend:
+            daily_charge = random.uniform(10, 30) # Maintaince charge
+        else:
+            daily_charge = random.uniform(70, 90) # Full cycle
 
         batt_actual = daily_charge * 6.80
         batt_peak = daily_charge * 10.20
@@ -72,26 +87,19 @@ def seed_demo_data():
             "energy_added": f"{int(daily_charge)} kWh",
             "initial_charge": "20%",
             "target_charge": "100%",
-            "total_cost": round(batt_actual, 2),  # Store as NUMBER
-            "peak_cost_comparison": round(batt_peak, 2),  # Store for graphing
+            "total_cost": round(batt_actual, 2),
+            "peak_cost_comparison": round(batt_peak, 2),
             "money_saved": f"₹{round(batt_savings, 2)}",
             "grid_status": "Off-Peak"
         })
 
-        # Alerts
+    # Add a few "Recent" alerts so the table isn't empty
     alerts_log.append({
         "id": 101, "time": now - timedelta(hours=3),
         "type": "CRITICAL_LEAK", "message": "Leak in Restroom 3B",
         "probable_wastage": "450 Liters", "estimated_savings": "₹22.95",
         "probability_score": "98.5%", "action": "AUTO_CUTOFF", "status": "RESOLVED"
     })
-    alerts_log.append({
-        "id": 102, "time": now - timedelta(minutes=15),
-        "type": "ENERGY_WASTE", "message": "Lecture Hall 101 AC on",
-        "probable_wastage": "2.5 kWh", "estimated_savings": "₹25.50",
-        "probability_score": "94.2%", "action": "AUTO_CUTOFF", "status": "RESOLVED"
-    })
-
 seed_demo_data()
 
 # --- DATA MODELS ---
