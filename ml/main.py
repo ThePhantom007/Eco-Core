@@ -312,7 +312,11 @@ def forecast_budget():
 
         # Ask AI for daily demand (Summing 8 active hours for simplicity)
         # We sample 10 AM as a representative "Peak Hour" for the model
-        hourly_flow = brain.predict_demand(hour=10, occupancy=sim_occupancy, light_lux=sim_light)
+        if brain:
+            # AI Available: Ask for prediction
+            hourly_flow = brain.predict_demand(hour=10, occupancy=sim_occupancy, light_lux=sim_light)
+        else:
+            hourly_flow = (sim_occupancy * 0.2) + 2.0
 
         # Daily Water = Hourly Flow * 10 active hours
         daily_water = hourly_flow * 60 * 10
