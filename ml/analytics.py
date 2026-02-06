@@ -1,11 +1,11 @@
+import warnings
+warnings.filterwarnings("ignore")
 import pandas as pd
 import numpy as np
 import joblib
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
-import warnings
-warnings.filterwarnings("ignore")
 
 class EcoBrain:
     def __init__(self):
