@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ecocore.R
+import com.example.ecocore.utils.data.Alert
 
 class AlertAdapter(
     private val onClick: ((Alert) -> Unit)? = null

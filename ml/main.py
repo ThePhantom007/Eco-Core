@@ -388,10 +388,10 @@ def manual_override(cmd: OverrideCommand):
         elif cmd.action == "OFF" and cmd.utility == "WATER":
             room_status_db[cmd.room_id]['pump_on'] = False
 
-        elif md.action == "ON" and cmd.utility == "POWER": 
+        elif cmd.action == "ON" and cmd.utility == "POWER": 
             room_status_db[cmd.room_id]['power_on'] = True
 
-        elif md.action == "OFF" and cmd.utility == "POWER":
+        elif cmd.action == "OFF" and cmd.utility == "POWER":
         
             room_status_db[cmd.room_id]['power_on'] = False
         

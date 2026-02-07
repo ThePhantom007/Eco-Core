@@ -16,7 +16,7 @@ import com.example.ecocore.fragments.ControlFragment
 import com.example.ecocore.utils.APIUtils.ApiClient
 import com.example.ecocore.utils.APIUtils.ApiService
 import com.example.ecocore.utils.AlertStore
-import com.example.ecocore.utils.DeviceStateStore
+import com.example.ecocore.utils.data.DeviceStateStore
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity() {
                 val alerts = api.getAlert()
                 AlertStore.update(alerts, this@MainActivity)
                 val status = api.getStatus("Demo Room A")
+                //for debugging
                 Log.d("RESPONSE STATUS", status.toString())
                 DeviceStateStore.update(
                     pump = status.pump_on,

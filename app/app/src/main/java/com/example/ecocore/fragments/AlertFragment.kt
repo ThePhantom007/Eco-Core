@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.ecocore.R
 import com.example.ecocore.databinding.AlertFragmentBinding
-import com.example.ecocore.utils.Alert
+import com.example.ecocore.utils.data.Alert
 import com.example.ecocore.utils.AlertAdapter
 import com.example.ecocore.utils.AlertStore
 

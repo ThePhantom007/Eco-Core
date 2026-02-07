@@ -11,8 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.ecocore.R
 import com.example.ecocore.utils.APIUtils.ApiClient
-import com.example.ecocore.utils.DeviceStateStore
-import com.example.ecocore.utils.OverrideCommand
+import com.example.ecocore.utils.data.DeviceStateStore
+import com.example.ecocore.utils.data.OverrideCommand
 import kotlinx.coroutines.launch
 
 class ControlFragment(): Fragment(){
@@ -41,8 +41,14 @@ class ControlFragment(): Fragment(){
             waterToggleButton.isChecked = DeviceStateStore.pumpOn
             powerToggleButton.isChecked = DeviceStateStore.powerOn
 
-            if (DeviceStateStore.pumpOn) waterStatus.setTextColor(Color.GREEN)
-            if (DeviceStateStore.powerOn) powerStatus.setTextColor(Color.GREEN)
+            if (DeviceStateStore.pumpOn){
+                waterStatus.setTextColor(Color.GREEN)
+                waterStatus.text = "Status: ON"
+            }
+            if (DeviceStateStore.powerOn){
+                powerStatus.setTextColor(Color.GREEN)
+                powerStatus.text = "Status: ON"
+            }
         }
 
 
@@ -57,14 +63,14 @@ class ControlFragment(): Fragment(){
                 lifecycleScope.launch {
                     cmd.action = "ON"
                     api.sendOverride(cmd)
-                    waterStatus.text = "ON"
+                    waterStatus.text = "Status: ON"
                     waterStatus.setTextColor(Color.GREEN)
                 }
             }else{
                 lifecycleScope.launch {
                     cmd.action="OFF"
                     api.sendOverride(cmd)
-                    waterStatus.text = "OFF"
+                    waterStatus.text = "Status: OFF"
                     waterStatus.setTextColor(Color.RED)
                 }
             }
@@ -72,7 +78,7 @@ class ControlFragment(): Fragment(){
 
         powerToggleButton.setOnCheckedChangeListener { _, isChecked ->
             val cmd = OverrideCommand(
-                user = "USER_PROTOTYPE",
+                user = "User",
                 utility = "POWER",
                 action = "OFF",
                 room_id = "Demo Room A"
@@ -81,14 +87,14 @@ class ControlFragment(): Fragment(){
                 lifecycleScope.launch {
                     cmd.action = "ON"
                     api.sendOverride(cmd)
-                    powerStatus.text = "ON"
+                    powerStatus.text = "Status: ON"
                     powerStatus.setTextColor(Color.GREEN)
                 }
             }else{
                 lifecycleScope.launch {
                     cmd.action="OFF"
                     api.sendOverride(cmd)
-                    powerStatus.text = "OFF"
+                    powerStatus.text = "Status: OFF"
                     powerStatus.setTextColor(Color.RED)
                 }
             }

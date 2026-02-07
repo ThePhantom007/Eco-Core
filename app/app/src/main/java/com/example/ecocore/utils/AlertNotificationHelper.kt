@@ -9,6 +9,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.ecocore.MainActivity
 import com.example.ecocore.R
+import com.example.ecocore.utils.data.Alert
 
 object AlertNotificationHelper {
 

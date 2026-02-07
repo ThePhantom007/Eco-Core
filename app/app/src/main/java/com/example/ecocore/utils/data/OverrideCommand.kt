@@ -1,4 +1,4 @@
-package com.example.ecocore.utils
+package com.example.ecocore.utils.data
 
 data class OverrideCommand(
     val user: String,
@@ -6,4 +6,3 @@ data class OverrideCommand(
     var action: String,
     val room_id: String
 )
-

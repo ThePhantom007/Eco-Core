@@ -1,4 +1,4 @@
-package com.example.ecocore.utils
+package com.example.ecocore.utils.data
 
 data class Alert(
     val id: Int,
