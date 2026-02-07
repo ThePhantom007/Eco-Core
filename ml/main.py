@@ -129,7 +129,7 @@ def ingest_sensor_data(data: SensorReading):
     if not data.timestamp: data.timestamp = datetime.now()
     current_hour = data.timestamp.hour
 
-    # WATER THRESHOLD (AI Predicted)
+    # WATER THRESHOLD
     predicted_water_normal = brain.predict_demand(current_hour, data.occupancy, data.light_lux)
     water_threshold = (predicted_water_normal * 1.5) + 1.0  # Safety buffer
 
