@@ -187,10 +187,11 @@ def ingest_sensor_data(data: SensorReading):
             alerts_log.append(alert)
 
     room_status_db[data.room_id] = {
-        "status": "Active" if data.occupancy else "Eco-Mode",
-        "last_update": data.timestamp,
-        "latest_alert": alert
-    }
+    "pump_on": True,
+    "power_on": True,
+    "last_update": data.timestamp,
+    "latest_alert": alert
+}
 
     return {
         "status": "success",
@@ -200,6 +201,7 @@ def ingest_sensor_data(data: SensorReading):
             "calc_energy_normal": expected_energy_load
         }
     }
+
 
 @app.get("/api/pump/optimize")
 def calculate_pump_schedule():
@@ -345,6 +347,17 @@ def get_pump_history():
 def get_battery_history():
     return sorted(battery_history_log, key=lambda x: x['timestamp'], reverse=True)
 
+@app.get("/api/status/{room_id}")
+def get_room_status(room_id: str):
+
+    room = room_status_db.get(room_id, {
+        "pump_on": False,
+        "power_on": False
+    })
+
+    return room
+
+
 # --- MANUAL OVERRIDE ---
 
 @app.post("/api/control/override")
@@ -369,7 +382,19 @@ def manual_override(cmd: OverrideCommand):
 
     # Update real-time status to reflect user command
     if cmd.room_id in room_status_db:
-        room_status_db[cmd.room_id]['status'] = f"MANUAL_{cmd.action}"
+        if cmd.action == "ON" and cmd.utility == "WATER":
+            room_status_db[cmd.room_id]['pump_on'] = True
+        
+        elif cmd.action == "OFF" and cmd.utility == "WATER":
+            room_status_db[cmd.room_id]['pump_on'] = False
+
+        elif cmd.action == "ON" and cmd.utility == "POWER": 
+            room_status_db[cmd.room_id]['power_on'] = True
+
+        elif cmd.action == "OFF" and cmd.utility == "POWER":
+        
+            room_status_db[cmd.room_id]['power_on'] = False
+        
 
     return {
         "status": "success",

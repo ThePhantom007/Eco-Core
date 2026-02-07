@@ -5,5 +5,9 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
+    <style name="main_bg_color">
+        <item name="android:background">@color/main_bg_color</item>
+    </style>
+
     <style name="Theme.EcoCore" parent="Base.Theme.EcoCore" />
 </resources>

@@ -1,0 +1,165 @@
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="12dp"
+    app:cardBackgroundColor="@android:color/transparent"
+    app:cardElevation="6dp"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_alert_card"
+        android:padding="16dp"
+        android:orientation="vertical">
+
+        <!-- Time -->
+        <TextView
+            android:id="@+id/tvTime"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="8:37 PM"
+            android:textColor="@color/alert_red"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginBottom="6dp"/>
+
+        <!-- Type -->
+        <TextView
+            android:id="@+id/tvType"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="CRITICAL_LEAK"
+            android:textColor="@color/alert_red"
+            android:textStyle="bold"
+            android:textSize="16sp"/>
+
+        <!-- Message -->
+        <TextView
+            android:id="@+id/tvMessage"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Leak in Restroom 3B"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Stats Row -->
+        <!-- Stats Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="4"
+            android:layout_marginTop="8dp">
+
+            <!-- Impact -->
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Impact"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp"/>
+
+                <TextView
+                    android:id="@+id/tvImpact"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="450 Liters"
+                    android:textColor="@color/alert_red"
+                    android:textStyle="bold"
+                    android:textSize="14sp"/>
+            </LinearLayout>
+
+            <!-- Savings -->
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Savings"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp"/>
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:id="@+id/tvSavings"
+                    android:text="₹22.95"
+                    android:textColor="@color/alert_green"
+                    android:textStyle="bold"
+                    android:textSize="14sp"/>
+            </LinearLayout>
+
+            <!-- Confidence -->
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Confidence"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp"/>
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:id="@+id/tvConfidence"
+                    android:text="98.5%"
+                    android:textColor="@color/alert_yellow"
+                    android:textStyle="bold"
+                    android:textSize="14sp"/>
+            </LinearLayout>
+
+            <!-- Status Chip -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical" android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Status"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp"/>
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:id="@+id/tvStatus"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:text="AUTO_CUTOFF"
+                    android:textColor="@color/forest_bg"
+                    android:textStyle="bold"
+                    android:textSize="11sp"
+                    android:background="@drawable/bg_status_chip"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

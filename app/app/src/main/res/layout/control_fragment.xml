@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- ================= HEADER ================= -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Manual Override"
+            android:textSize="35dp"
+            android:layout_marginVertical="10dp"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@android:color/white"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Take manual control of safety systems"
+            android:textSize="13sp"
+            android:textColor="#BBBBBB"
+            android:layout_marginBottom="18dp"/>
+
+
+
+        <!-- ================= WATER CARD ================= -->
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardWaterOverride"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="10dp"
+            app:cardBackgroundColor="#1B2A1F">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="18dp"
+                android:orientation="vertical">
+
+                <!-- top row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/rain_drops"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Water Supply"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="@color/white"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"/>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/switchWater"/>
+                </LinearLayout>
+
+                <!-- description -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Override automatic leak shutdown"
+                    android:textSize="13sp"
+                    android:textColor="@color/white"
+                    android:layout_marginTop="6dp"/>
+
+                <!-- current status -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvWaterStatus"
+                    android:text="Status: OFF"
+                    android:textStyle="bold"
+                    android:textColor="#EF5350"
+                    android:layout_marginTop="8dp"/>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+
+
+        <!-- ================= POWER CARD ================= -->
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardPowerOverride"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="10dp"
+            app:cardBackgroundColor="#1A1F2A">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="18dp"
+                android:orientation="vertical">
+
+                <!-- top row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/power"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Power Supply"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="@color/white"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"/>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/switchPower"/>
+                </LinearLayout>
+
+                <!-- description -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Override automatic power cutoff"
+                    android:textSize="13sp"
+                    android:textColor="@color/white"
+                    android:layout_marginTop="6dp"/>
+
+                <!-- current status -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvPowerStatus"
+                    android:text="Status: OFF"
+                    android:textStyle="bold"
+                    android:textColor="#EF5350"
+                    android:layout_marginTop="8dp"/>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+</ScrollView>
