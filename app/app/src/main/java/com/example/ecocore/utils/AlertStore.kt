@@ -1,6 +1,7 @@
 package com.example.ecocore.utils
 
 import android.content.Context
+import com.example.ecocore.utils.data.Alert
 
 object AlertStore {
 

@@ -1,8 +1,8 @@
 package com.example.ecocore.utils.APIUtils
 
-import com.example.ecocore.utils.Alert
-import com.example.ecocore.utils.DeviceStatus
-import com.example.ecocore.utils.OverrideCommand
+import com.example.ecocore.utils.data.Alert
+import com.example.ecocore.utils.data.DeviceStatus
+import com.example.ecocore.utils.data.OverrideCommand
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
