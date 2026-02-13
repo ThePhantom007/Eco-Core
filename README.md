@@ -2,8 +2,8 @@
 
 > **A complete adaptive sustainability ecosystem, where demand actively dictates supply.**
 
-![EcoCore Dashboard Preview](<img width="944" height="419" alt="image" src="https://github.com/user-attachments/assets/ca97e5a3-7eb7-4a6b-82a9-023df6d1e7e9" />
-)
+![EcoCore Dashboard Preview]([<img width="944" height="419" alt="image" src="https://github.com/user-attachments/assets/ca97e5a3-7eb7-4a6b-82a9-023df6d1e7e9" />
+](https://github.com/user-attachments/assets/ca97e5a3-7eb7-4a6b-82a9-023df6d1e7e9))
 
 ## 📖 About The Project
 
