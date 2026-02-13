@@ -2,7 +2,8 @@
 
 > **A complete adaptive sustainability ecosystem, where demand actively dictates supply.**
 
-![EcoCore Dashboard Preview](https://via.placeholder.com/1000x500.png?text=EcoCore+OS+Dashboard+Preview)
+![<img width="944" height="419" alt="image" src="https://github.com/user-attachments/assets/ca97e5a3-7eb7-4a6b-82a9-023df6d1e7e9" />
+](https://github.com/user-attachments/assets/ca97e5a3-7eb7-4a6b-82a9-023df6d1e7e9)
 
 ## 📖 About The Project
 
@@ -72,5 +73,5 @@ By implementing Eco Core OS, facilities can achieve:
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/ThePhantom007/Eco-Core.git](https://github.com/ThePhantom007/Eco-Core.git)
+   git clone (https://github.com/ThePhantom007/Eco-Core.git)
    cd Eco-Core
