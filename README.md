@@ -73,5 +73,5 @@ By implementing Eco Core OS, facilities can achieve:
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/ThePhantom007/Eco-Core.git](https://github.com/ThePhantom007/Eco-Core.git)
+   git clone (https://github.com/ThePhantom007/Eco-Core.git)
    cd Eco-Core
