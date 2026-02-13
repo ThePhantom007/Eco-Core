@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime, timedelta
@@ -119,6 +120,9 @@ def calculate_confidence(value, threshold):
     return round(confidence * 100, 2)
 
 # --- CORE ROUTES ---
+@app.get("/")
+def read_root():
+    return RedirectResponse(url="/dashboard")
 @app.get("/dashboard")
 def dashboard(request: Request):
     """Serves the main website dashboard."""
